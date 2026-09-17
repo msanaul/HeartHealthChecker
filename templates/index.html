@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartCheck | Heart Health Assessment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <a class="brand" href="#home">Heart<span>Check</span></a>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#assessment">Assessment</a>
+            {% if prediction is defined %}<a href="#result">Result</a>{% endif %}
+        </nav>
+        <a class="nav-button" href="#assessment">Check Now</a>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="hero-copy">
+                <div class="eyebrow">AI-POWERED HEART HEALTH</div>
+                <h1>Understand your<br><span>heart health.</span></h1>
+                <p>Use a machine-learning model trained on clinical heart-disease data to estimate your risk from a few health indicators.</p>
+                <div class="hero-actions">
+                    <a class="primary-button" href="#assessment">Check Your Heart Health</a>
+                    <a class="secondary-button" href="#about">How it works</a>
+                </div>
+                <div class="trust-row">
+                    <div><strong>918</strong><small>training records</small></div>
+                    <div><strong>11</strong><small>health indicators</small></div>
+                    <div><strong>ML</strong><small>risk estimation</small></div>
+                </div>
+            </div>
+            <div class="heart-panel">
+                <div class="pulse-ring"></div>
+                <div class="heart-symbol">♥</div>
+                <div class="panel-label">HEART<br>HEALTH</div>
+            </div>
+        </section>
+
+        <section class="about section" id="about">
+            <div class="section-heading">
+                <div class="eyebrow">THE PROCESS</div>
+                <h2>Simple inputs. Intelligent analysis.</h2>
+            </div>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <span>01</span>
+                    <h3>Enter your data</h3>
+                    <p>Provide basic demographic, blood pressure, cholesterol and exercise-related information.</p>
+                </article>
+                <article class="feature-card">
+                    <span>02</span>
+                    <h3>AI analysis</h3>
+                    <p>A Random Forest classification pipeline processes the information using the same feature structure used during training.</p>
+                </article>
+                <article class="feature-card">
+                    <span>03</span>
+                    <h3>Risk estimate</h3>
+                    <p>Get a clear prediction together with a probability-based risk indicator to make the output easier to understand.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="assessment section" id="assessment">
+            <div class="section-heading">
+                <div class="eyebrow">HEART ASSESSMENT</div>
+                <h2>Tell us about your heart.</h2>
+                <p>Complete all fields for the model to generate an estimate.</p>
+            </div>
+
+            <form class="form-card" action="{{ url_for('predict') }}" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="Age">Age</label>
+                        <input type="number" id="Age" name="Age" min="1" max="120" placeholder="Years" required value="{{ submitted.Age if submitted else '' }}">
+                    </div>
+
+                    <div class="field">
+                        <label for="Sex">Gender</label>
+                        <select id="Sex" name="Sex" required>
+                            <option value="" disabled {% if not submitted %}selected{% endif %}>Select gender</option>
+                            <option value="M" {% if submitted and submitted.Sex == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if submitted and submitted.Sex == 'F' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="ChestPainType">Chest Pain Type</label>
+                        <select id="ChestPainType" name="ChestPainType" required>
+                            <option value="" disabled {% if not submitted %}selected{% endif %}>Select type</option>
+                            <option value="ATA" {% if submitted and submitted.ChestPainType == 'ATA' %}selected{% endif %}>ATA — Atypical Angina</option>
+                            <option value="NAP" {% if submitted and submitted.ChestPainType == 'NAP' %}selected{% endif %}>NAP — Non-Anginal Pain</option>
+                            <option value="ASY" {% if submitted and submitted.ChestPainType == 'ASY' %}selected{% endif %}>ASY — Asymptomatic</option>
+                            <option value="TA" {% if submitted and submitted.ChestPainType == 'TA' %}selected{% endif %}>TA — Typical Angina</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="RestingBP">Resting Blood Pressure</label>
+                        <input type="number" id="RestingBP" name="RestingBP" min="50" max="250" placeholder="mm Hg" required value="{{ submitted.RestingBP if submitted else '' }}">
+                    </div>
+
+                    <div class="field">
+                        <label for="Cholesterol">Cholesterol</label>
+                        <input type="number" id="Cholesterol" name="Cholesterol" min="50" max="700" placeholder="mg/dL" required value="{{ submitted.Cholesterol if submitted else '' }}">
+                    </div>
+
+                    <div class="field">
+                        <label for="FastingBS">Fasting Blood Sugar</label>
+                        <select id="FastingBS" name="FastingBS" required>
+                            <option value="" disabled {% if not submitted %}selected{% endif %}>Select status</option>
+                            <option value="0" {% if submitted and submitted.FastingBS == 0 %}selected{% endif %}>Normal</option>
+                            <option value="1" {% if submitted and submitted.FastingBS == 1 %}selected{% endif %}>High</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="RestingECG">Resting ECG</label>
+                        <select id="RestingECG" name="RestingECG" required>
+                            <option value="" disabled {% if not submitted %}selected{% endif %}>Select result</option>
+                            <option value="Normal" {% if submitted and submitted.RestingECG == 'Normal' %}selected{% endif %}>Normal</option>
+                            <option value="ST" {% if submitted and submitted.RestingECG == 'ST' %}selected{% endif %}>ST-T Wave Abnormality</option>
+                            <option value="LVH" {% if submitted and submitted.RestingECG == 'LVH' %}selected{% endif %}>Left Ventricular Hypertrophy</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="MaxHR">Maximum Heart Rate</label>
+                        <input type="number" id="MaxHR" name="MaxHR" min="50" max="250" placeholder="bpm" required value="{{ submitted.MaxHR if submitted else '' }}">
+                    </div>
+
+                    <div class="field">
+                        <label for="ExerciseAngina">Exercise Angina</label>
+                        <select id="ExerciseAngina" name="ExerciseAngina" required>
+                            <option value="" disabled {% if not submitted %}selected{% endif %}>Select status</option>
+                            <option value="Y" {% if submitted and submitted.ExerciseAngina == 'Y' %}selected{% endif %}>Yes</option>
+                            <option value="N" {% if submitted and submitted.ExerciseAngina == 'N' %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="Oldpeak">ST Depression (Oldpeak)</label>
+                        <input type="number" id="Oldpeak" name="Oldpeak" min="-5" max="10" step="0.1" placeholder="e.g. 1.0" required value="{{ submitted.Oldpeak if submitted else '' }}">
+                    </div>
+
+                    <div class="field">
+                        <label for="ST_Slope">ST Slope</label>
+                        <select id="ST_Slope" name="ST_Slope" required>
+                            <option value="" disabled {% if not submitted %}selected{% endif %}>Select slope</option>
+                            <option value="Up" {% if submitted and submitted.ST_Slope == 'Up' %}selected{% endif %}>Up</option>
+                            <option value="Flat" {% if submitted and submitted.ST_Slope == 'Flat' %}selected{% endif %}>Flat</option>
+                            <option value="Down" {% if submitted and submitted.ST_Slope == 'Down' %}selected{% endif %}>Down</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="submit-button" type="submit">Analyze My Heart Health <span>→</span></button>
+                <p class="form-note">This tool provides a machine-learning estimate and is not a medical diagnosis.</p>
+            </form>
+        </section>
+
+        {% if error %}
+        <section class="result section" id="result">
+            <div class="result-card error-card">
+                <div class="result-icon">!</div>
+                <div>
+                    <div class="eyebrow">PROCESSING ERROR</div>
+                    <h2>We couldn't complete the assessment.</h2>
+                    <p>{{ error }}</p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        {% if prediction is defined %}
+        <section class="result section" id="result">
+            <div class="result-card {{ risk_class }}">
+                <div class="result-top">
+                    <div>
+                        <div class="eyebrow">AI ASSESSMENT RESULT</div>
+                        <h2>{% if prediction == 1 %}Elevated heart-disease risk detected{% else %}Lower heart-disease risk estimated{% endif %}</h2>
+                        <p>This result is an estimate generated from the information you entered and the trained machine-learning model.</p>
+                    </div>
+                    <div class="risk-score">
+                        <strong>{{ probability }}%</strong>
+                        <span>estimated probability</span>
+                    </div>
+                </div>
+                <div class="risk-bar"><span style="width: {{ probability }}%;"></span></div>
+                <div class="risk-meta">
+                    <span class="risk-badge">{{ risk_label }}</span>
+                    <a href="#assessment">Run another assessment →</a>
+                </div>
+                <div class="disclaimer">
+                    <strong>Important:</strong> This is not a diagnosis and should not replace professional medical advice. If you have concerning symptoms, seek medical care promptly.
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        <span>HeartCheck</span>
+        <p>Machine-learning heart health assessment</p>
+    </footer>
+
+    <script>
+        const result = document.getElementById("result");
+        if (result) {
+            setTimeout(() => result.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+        }
+    </script>
+</body>
+</html>
